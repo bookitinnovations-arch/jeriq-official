@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Primitives ---
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // --- Entity Validations ---
+
+    function isValidStreetCourtEntry(data) {
+      return data.keys().hasAll(['name', 'city', 'reason', 'induct_votes', 'exile_votes', 'status', 'createdAt'])
+        && data.keys().size() == 7
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.city is string && data.city.size() > 0 && data.city.size() <= 100
+        && data.reason is string && data.reason.size() > 0 && data.reason.size() <= 100
+        && data.induct_votes is int && data.induct_votes >= 0
+        && data.exile_votes is int && data.exile_votes >= 0
+        && data.status in ['pending', 'inducted', 'exiled']
+        && data.createdAt == request.time;
+    }
+
+    function isValidRapBattleVote(data) {
+      return data.keys().hasAll(['side', 'topic', 'createdAt'])
+        && data.keys().size() == 3
+        && data.side in ['east', 'west']
+        && data.topic is string && data.topic.size() > 0 && data.topic.size() <= 100
+        && data.createdAt == request.time;
+    }
+
+    function isValidTriviaScore(data) {
+      return data.keys().hasAll(['userId', 'username', 'score', 'timestamp'])
+        && data.keys().size() == 4
+        && data.userId == request.auth.uid
+        && data.username is string && data.username.size() > 0
+        && data.score is int && data.score >= 0
+        && data.timestamp == request.time;
+    }
+
+    // --- Collection Rules ---
+
+    // Street Court
+    match /street_court/{id} {
+      allow list: if true; // Public view for community engagement
+      allow get: if true;
+      allow create: if isValidStreetCourtEntry(incoming());
+      allow update: if (
+        isValidStreetCourtEntry(incoming()) && (
+          // Action: Community Vote
+          (incoming().diff(existing()).affectedKeys().hasOnly(['induct_votes', 'exile_votes', 'status']))
+        )
+      );
+      // Delete prohibited for judicial integrity
+    }
+
+    // Rap Battle Votes
+    match /rap_battle_votes/{id} {
+      allow list: if true;
+      allow create: if isValidRapBattleVote(incoming());
+    }
+
+    // Trivia Leaderboard
+    match /leaderboard/{id} {
+      allow list: if true;
+      allow create: if isSignedIn() && isValidTriviaScore(incoming());
+    }
+
+    // Contact Messages
+    match /messages/{id} {
+      allow create: if true;
+    }
+
+    // Fan Messages
+    match /fan_messages/{id} {
+      allow list: if true;
+      allow create: if true;
+    }
+    
+    // Admins (Internal)
+    match /admins/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+    }
+  }
+}

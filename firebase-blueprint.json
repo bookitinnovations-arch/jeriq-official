@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "TriviaScore": {
+      "title": "Trivia Score",
+      "description": "User scores for the trivia game",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "score": { "type": "integer" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "username", "score", "timestamp"]
+    },
+    "StreetCourtEntry": {
+      "title": "Street Court Entry",
+      "description": "Candidates for induction or exile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "city": { "type": "string" },
+        "reason": { "type": "string" },
+        "induct_votes": { "type": "integer" },
+        "exile_votes": { "type": "integer" },
+        "status": { "type": "string", "enum": ["pending", "inducted", "exiled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "city", "reason", "induct_votes", "exile_votes", "status", "createdAt"]
+    },
+    "RapBattleVote": {
+      "title": "Rap Battle Vote",
+      "description": "Communal votes for East vs West battle",
+      "type": "object",
+      "properties": {
+        "side": { "type": "string", "enum": ["east", "west"] },
+        "topic": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["side", "topic", "createdAt"]
+    },
+    "ContactMessage": {
+      "title": "Contact Message",
+      "description": "Messages sent from the contact form",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "subject", "message", "timestamp"]
+    },
+    "FanMessage": {
+      "title": "Fan Message",
+      "description": "Messages posted on the public Fan Wall",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "message": { "type": "string" },
+        "country": { "type": "string" },
+        "likes": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "message", "country", "likes", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/leaderboard/{scoreId}": {
+      "schema": "TriviaScore",
+      "description": "Global leaderboard for Jeriq Trivia"
+    },
+    "/street_court/{id}": {
+      "schema": "StreetCourtEntry",
+      "description": "Live community entries for induction/exile"
+    },
+    "/rap_battle_votes/{id}": {
+      "schema": "RapBattleVote",
+      "description": "Communal votes for East vs West battle"
+    },
+    "/messages/{messageId}": {
+      "schema": "ContactMessage",
+      "description": "Direct fan and business messages"
+    },
+    "/fan_messages/{messageId}": {
+      "schema": "FanMessage",
+      "description": "Public community messages from around the world"
+    }
+  }
+}

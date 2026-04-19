@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bebas Neue", cursive;
+  
+  --color-brand-blue: #1a47b8; /* Royal Blue */
+  --color-brand-blue-glow: #2a5fd4;
+  --color-brand-black: #0a0a0a;
+  --color-brand-grey: #111111;
+  --color-brand-white: #F5F5F5;
+}
+
+@layer base {
+  :root {
+    --mood-bg: #0a0a0a;
+    --mood-accent: #1a47b8;
+    --mood-glow: rgba(26, 71, 184, 0.3);
+  }
+
+  /* Morning Hustle (6am-12pm) */
+  [data-mood="morning"] {
+    --mood-bg: #0f172a;
+    --mood-accent: #3b82f6;
+    --mood-glow: rgba(59, 130, 246, 0.4);
+  }
+
+  /* Afternoon Grind (12pm-6pm) - Default */
+  [data-mood="afternoon"] {
+    --mood-bg: #0a0a0a;
+    --mood-accent: #1a47b8;
+    --mood-glow: rgba(26, 71, 184, 0.3);
+  }
+
+  /* Night Cartel (6pm-12am) */
+  [data-mood="night"] {
+    --mood-bg: #050505;
+    --mood-accent: #1e40af;
+    --mood-glow: rgba(30, 64, 175, 0.6);
+  }
+
+  /* 3am in Enugu (12am-6am) */
+  [data-mood="3am"] {
+    --mood-bg: #020617;
+    --mood-accent: #1e1b4b;
+    --mood-glow: rgba(30, 27, 75, 0.5);
+  }
+
+  body {
+    @apply bg-[var(--mood-bg)] text-brand-white font-sans antialiased selection:bg-brand-blue selection:text-white transition-colors duration-1000 overflow-x-hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-wider uppercase;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px var(--mood-glow), 0 0 20px var(--mood-glow);
+  }
+  
+  .bg-glow {
+    box-shadow: 0 0 20px var(--mood-glow), inset 0 0 10px var(--mood-glow);
+  }
+
+  .glitch-text {
+    position: relative;
+    display: inline-block;
+  }
+
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-brand-black);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--mood-accent);
+  border-radius: 10px;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scanline::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, transparent, rgba(26, 71, 184, 0.1), transparent);
+  pointer-events: none;
+  animation: scanline 8s linear infinite;
+}
