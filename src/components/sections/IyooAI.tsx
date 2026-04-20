@@ -73,10 +73,13 @@ export default function IyooAI() {
 
     try {
       const resp = await iyooAI.chat(userMessage, history);
-      setMessages(prev => prev.map(m => m.id === id ? { ...m, content: resp.text } : m));
-    } catch (err) {
-      console.error("Chat error", err);
-      setMessages(prev => prev.map(m => m.id === id ? { ...m, content: "IYOO!!! Signal lost in the hussle. Go again." } : m));
+      setMessages(prev => prev.map(m => m.id === id ? { ...m, content: resp.text || "IYOO!!! Signal lost in the hussle. Go again." } : m));
+    } catch (err: any) {
+      console.error("IYOO AI CHAT ERROR:", err);
+      // Log more details if available
+      if (err.message) console.error("Error Message:", err.message);
+      
+      setMessages(prev => prev.map(m => m.id === id ? { ...m, content: `IYOO!!! Signal lost: ${err.message || "Unknown error"}. Go again.` } : m));
     } finally {
       setIsLoading(false);
     }
